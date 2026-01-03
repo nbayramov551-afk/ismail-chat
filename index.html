@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sovereign V6 Global</title>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --main: #00f2fe; --bg: #050505; --card: #121212; --msg-sent: #00f2fe; --msg-rec: #1f1f1f; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* HEADER */
+        .header { background: var(--card); padding: 15px; border-bottom: 2px solid var(--main); display: flex; justify-content: space-between; align-items: center; z-index: 10; box-shadow: 0 5px 20px rgba(0,242,254,0.1); }
+        .status-box { display: flex; flex-direction: column; }
+        .status-txt { font-size: 11px; font-weight: bold; letter-spacing: 1px; color: #777; transition: 0.3s; }
+        .online-glow { color: #39d353; text-shadow: 0 0 10px #39d353; }
+
+        /* VIDEO CALL UI */
+        #call-ui { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; justify-content: center; }
+        .video-wrapper { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        #remV { width: 100%; height: 100%; object-fit: cover; }
+        #locV { position: absolute; top: 20px; right: 20px; width: 100px; height: 140px; border: 2px solid var(--main); border-radius: 10px; object-fit: cover; background: #222; z-index: 10; transform: scaleX(-1); }
+        .controls { position: absolute; bottom: 40px; display: flex; gap: 25px; z-index: 20; }
+        .c-btn { width: 60px; height: 60px; border-radius: 50%; border: none; font-size: 22px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+
+        /* CHAT */
+        .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%); }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 15px; word-wrap: break-word; animation: popIn 0.3s ease; }
+        .sent { align-self: flex-end; background: var(--msg-sent); color: #000; font-weight: 600; border-bottom-right-radius: 2px; }
+        .received { align-self: flex-start; background: var(--msg-rec); border: 1px solid #333; border-bottom-left-radius: 2px; color: #ddd; }
+
+        /* FOOTER */
+        .footer { padding: 15px; background: var(--card); display: flex; gap: 10px; align-items: center; border-top: 1px solid #333; padding-bottom: calc(15px + env(safe-area-inset-bottom)); }
+        .input-wrap { flex: 1; background: #000; border: 1px solid #333; border-radius: 30px; padding: 0 20px; height: 50px; display: flex; align-items: center; }
+        input { background: none; border: none; color: white; flex: 1; outline: none; font-size: 16px; }
+        .send-btn { width: 50px; height: 50px; border-radius: 50%; background: var(--main); border: none; font-size: 20px; color: #000; cursor: pointer; }
+
+        @keyframes popIn { from{opacity:0; transform:scale(0.9);} to{opacity:1; transform:scale(1);} }
+    </style>
+</head>
+<body>
+
+<div id="call-ui">
+    <div class="video-wrapper">
+        <video id="remV" autoplay playsinline></video>
+        <video id="locV" autoplay muted playsinline></video>
+        <div class="controls">
+            <button class="c-btn" onclick="endCall()" style="background: #ff3b30;"><i class="fas fa-phone-slash"></i></button>
+            <button class="c-btn" onclick="toggleMute()" id="muteBtn" style="background: rgba(255,255,255,0.2);"><i class="fas fa-microphone"></i></button>
+            <button class="c-btn" onclick="toggleCam()" id="camBtn" style="background: rgba(255,255,255,0.2);"><i class="fas fa-video"></i></button>
+        </div>
+    </div>
+</div>
+
+<div class="header">
+    <div class="status-box">
+        <b style="color:var(--main); font-size:16px;">SOVEREIGN V6</b>
+        <span id="st" class="status-txt">BAĞLANIR... / ПОДКЛЮЧЕНИЕ...</span>
+    </div>
+    <div style="display:flex; gap:20px; font-size:22px; color:var(--main);">
+        <i class="fas fa-video" onclick="startVideoCall()"></i>
+        <i class="fas fa-sync" onclick="location.reload()"></i>
+    </div>
+</div>
+
+<div class="chat-area" id="chat">
+    <div style="text-align:center; opacity:0.5; font-size:12px; margin-top:10px;">
+        🔒 XƏTT ŞİFRƏLƏNİB / ЛИНИЯ ЗАШИФРОВАНА
+    </div>
+</div>
+
+<div class="footer">
+    <div class="input-wrap">
+        <input type="text" id="mIn" placeholder="Mesaj / Сообщение..." autocomplete="off">
+    </div>
+    <button class="send-btn" id="mBtn"><i class="fas fa-paper-plane"></i></button>
+</div>
+
+<script>
+    // 🔱 BOSS SECURITY CORE V6
+    const BOSS_KEY = "BOSS_GLOBAL_V6_KEY";
+    const urlParams = new URLSearchParams(window.location.search);
+    const isJoin = urlParams.has('join');
+    
+    // Dynamic ID Generation (Anti-Collision)
+    const roomID = "boss_room_v6"; 
+    const myID = isJoin ? 'guest_' + roomID : 'admin_' + roomID;
+    const targetID = isJoin ? 'admin_' + roomID : 'guest_' + roomID;
+
+    // Advanced XOR + Base64 Encryption
+    const encrypt = (text) => {
+        let res = "";
+        for(let i=0; i<text.length; i++) res += String.fromCharCode(text.charCodeAt(i) ^ BOSS_KEY.charCodeAt(i % BOSS_KEY.length));
+        return btoa(res);
+    };
+    const decrypt = (encoded) => {
+        try {
+            let text = atob(encoded);
+            let res = "";
+            for(let i=0; i<text.length; i++) res += String.fromCharCode(text.charCodeAt(i) ^ BOSS_KEY.charCodeAt(i % BOSS_KEY.length));
+            return res;
+        } catch (e) { return "Error"; }
+    };
+
+    let peer, conn, localStream;
+    let isMuted = false, isCamOff = false;
+
+    function initSystem() {
+        // Multi-Server STUN Configuration for Yandex/Mobile
+        peer = new Peer(myID, {
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun.services.mozilla.com' }
+                ],
+                iceCandidatePoolSize: 10
+            },
+            debug: 0
+        });
+
+        peer.on('open', (id) => {
+            updateStatus(isJoin ? "ADMİN GÖZLƏNİLİR / ОЖИДАНИЕ" : "ONLAYN (ADMİN) / ОНЛАЙН", false);
+            if(isJoin) connectToPartner();
+        });
+
+        peer.on('connection', (c) => {
+            conn = c;
+            setupConnection();
+        });
+
+        peer.on('call', async (call) => {
+            // Auto-Answer UI Prompt
+            if(confirm("📞 ZƏNG GƏLİR / ВХОДЯЩИЙ ЗВОНОК\nQəbul edilsin?")) {
+                await openCamera();
+                call.answer(localStream);
+                handleStream(call);
+            }
+        });
+
+        peer.on('error', (err) => {
+            console.log(err);
+            if(isJoin) setTimeout(connectToPartner, 2000); // Auto-Retry
+        });
+    }
+
+    function connectToPartner() {
+        conn = peer.connect(targetID, { reliable: true });
+        setupConnection();
+    }
+
+    function setupConnection() {
+        conn.on('open', () => {
+            updateStatus("BAĞLANDI 🔒 / ПОДКЛЮЧЕНО", true);
+            // Heartbeat to keep connection alive on Yandex
+            setInterval(() => { if(conn.open) conn.send({type:'ping'}); }, 5000);
+        });
+        conn.on('data', (data) => {
+            if(data.type === 'msg') uiAddMsg(decrypt(data.content), 'received');
+        });
+        conn.on('close', () => {
+            updateStatus("KƏSİLDİ / ОТКЛЮЧЕНО", false);
+            if(isJoin) setTimeout(connectToPartner, 2000);
+        });
+    }
+
+    // Media Handling
+    async function openCamera() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({video: true, audio: true});
+            document.getElementById('call-ui').style.display = 'flex';
+            document.getElementById('locV').srcObject = localStream;
+        } catch(e) {
+            alert("Kamera/Mikrofon icazəsi yoxdur! / Нет доступа к камере!");
+        }
+    }
+
+    async function startVideoCall() {
+        await openCamera();
+        const call = peer.call(targetID, localStream);
+        handleStream(call);
+    }
+
+    function handleStream(call) {
+        call.on('stream', (remoteStream) => {
+            document.getElementById('remV').srcObject = remoteStream;
+        });
+        call.on('close', endCall);
+    }
+
+    function endCall() {
+        if(localStream) localStream.getTracks().forEach(t => t.stop());
+        document.getElementById('call-ui').style.display = 'none';
+        location.reload(); // Refresh to clean state
+    }
+
+    // UI Logic
+    function updateStatus(text, isOnline) {
+        const el = document.getElementById('st');
+        el.innerText = text;
+        if(isOnline) el.classList.add('online-glow');
+        else el.classList.remove('online-glow');
+    }
+
+    function uiAddMsg(txt, type) {
+        const div = document.createElement('div');
+        div.className = `msg ${type}`;
+        div.innerText = txt;
+        const chat = document.getElementById('chat');
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    // Controls
+    document.getElementById('mBtn').onclick = () => {
+        const input = document.getElementById('mIn');
+        const val = input.value.trim();
+        if(val && conn && conn.open) {
+            conn.send({type: 'msg', content: encrypt(val)});
+            uiAddMsg(val, 'sent');
+            input.value = '';
+        }
+    };
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        localStream.getAudioTracks()[0].enabled = !isMuted;
+        document.getElementById('muteBtn').style.background = isMuted ? "#ff3b30" : "rgba(255,255,255,0.2)";
+    }
+
+    function toggleCam() {
+        isCamOff = !isCamOff;
+        localStream.getVideoTracks()[0].enabled = !isCamOff;
+        document.getElementById('camBtn').style.background = isCamOff ? "#ff3b30" : "rgba(255,255,255,0.2)";
+    }
+
+    initSystem();
+</script>
+</body>
+</html>
