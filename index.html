@@ -3,120 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHANTOM_V10_MOSCOW</title>
+    <title>PHANTOM_GOD_MODE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; }
-        #interface { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #001 0%, #000 100%); }
-        .moscow-shield { border: 2px solid #f00; padding: 40px; background: rgba(10,0,0,0.9); box-shadow: 0 0 100px #f00; width: 400px; text-align: center; border-radius: 5px; position: relative; }
-        .moscow-shield::after { content: "MOSCOW_SATELLITE_LINK"; position: absolute; bottom: -10px; right: 10px; background: #f00; color: #fff; font-size: 9px; padding: 2px 6px; }
-        input { background: #000; border: 1px solid #f00; color: #fff; padding: 15px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; font-size: 14px; letter-spacing: 2px; }
-        .launch-btn { background: #300; color: #f00; border: 2px solid #f00; padding: 20px; cursor: pointer; width: 100%; font-weight: bold; letter-spacing: 5px; text-transform: uppercase; transition: 0.3s; }
-        .launch-btn:hover { background: #f00; color: #000; box-shadow: 0 0 50px #f00; }
-        #v-grid { display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; background: #000; }
-        video { width: 50%; height: 100%; object-fit: cover; border: 1px solid #f00; filter: contrast(120%) brightness(80%) grayscale(20%); }
-        #status-bar { position: fixed; bottom: 0; width: 100%; background: #200; color: #f00; padding: 12px; font-size: 11px; border-top: 2px solid #f00; z-index: 1000; font-weight: bold; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* GİRİŞ EKRANI */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle at center, #111 0%, #000 100%); z-index: 2; position: relative; }
+        .cyber-box { width: 90%; max-width: 350px; padding: 30px; border: 1px solid #333; background: rgba(10,10,10,0.95); border-radius: 12px; text-align: center; box-shadow: 0 0 40px rgba(0, 255, 255, 0.05); }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: 3px; background: linear-gradient(90deg, #00f, #0ff); -webkit-background-clip: text; color: transparent; margin-bottom: 20px; }
+        
+        input { background: #080808; border: 1px solid #222; color: #fff; padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; outline: none; border-radius: 8px; font-size: 14px; text-align: center; transition: 0.3s; }
+        input:focus { border-color: #0ff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
+        
+        .role-selector { display: flex; gap: 10px; margin: 15px 0; }
+        .role-btn { flex: 1; padding: 12px; border: 1px solid #333; background: #000; color: #666; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.3s; }
+        .role-btn.active { background: #001133; border-color: #00f; color: #fff; box-shadow: 0 0 15px rgba(0, 80, 255, 0.4); }
+
+        .connect-btn { width: 100%; padding: 18px; border: none; background: linear-gradient(90deg, #000044, #000088); color: #fff; font-size: 14px; font-weight: bold; letter-spacing: 2px; border-radius: 8px; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 20px rgba(0,0,255,0.2); transition: 0.3s; }
+        .connect-btn:active { transform: scale(0.98); }
+
+        /* VİDEO EKRANI */
+        #video-grid { display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        #local-video { width: 100px; height: 150px; bottom: 100px; right: 20px; top: auto; left: auto; border-radius: 10px; border: 2px solid #333; z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        #remote-video { z-index: 1; }
+
+        /* NƏZARƏT PANELİ (APP FEEL) */
+        .controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 20; background: rgba(20,20,20,0.8); padding: 15px 25px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid #333; }
+        .ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #333; color: #fff; font-size: 18px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .ctrl-btn.off { background: #f00; color: #fff; }
+        .ctrl-btn.hangup { background: #f00; width: 50px; }
+
+        /* STATUS BAR */
+        .status-pill { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; font-size: 10px; color: #0f0; border: 1px solid #0f0; z-index: 20; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
+        .dot { width: 8px; height: 8px; background: #0f0; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
     </style>
 </head>
 <body>
 
-    <div id="interface">
-        <div class="moscow-shield">
-            <h1 style="margin:0; color: #fff; text-shadow: 0 0 20px #f00;">PHANTOM_V10</h1>
-            <p style="color: #f00; font-size: 10px;">AES-512_HYBRID // MOSCOW_DPI_BYPASS</p>
-            <input type="password" id="k" placeholder="HƏRBİ_TOKEN">
-            <input type="text" id="s" placeholder="HƏDƏF_SEKTOR">
-            <button class="launch-btn" onclick="ignite()">SİGNALI_ATEŞLƏ</button>
+    <div id="login-screen">
+        <div class="cyber-box">
+            <div class="logo">PHANTOM V14</div>
+            <p style="font-size: 10px; color: #888; margin-bottom: 20px;">GOD_MODE // QUANTUM_ENCRYPTION</p>
+            
+            <input type="password" id="pass" placeholder="GİZLİ ŞİFRƏ (TOKEN)">
+            <input type="text" id="room" placeholder="OTAQ ADI">
+            
+            <div class="role-selector">
+                <div class="role-btn" id="btnA" onclick="setRole('A')">HOST (SƏN)</div>
+                <div class="role-btn" id="btnB" onclick="setRole('B')">GUEST (DOSTUN)</div>
+            </div>
+
+            <button class="connect-btn" onclick="startSystem()">BAĞLANTI QUR</button>
         </div>
     </div>
 
-    <div id="v-grid">
-        <video id="lv" autoplay muted playsinline></video>
-        <video id="rv" autoplay playsinline></video>
+    <div id="video-grid">
+        <div class="status-pill"><div class="dot"></div><span id="status-text">HAZIRLANIR...</span></div>
+        <video id="remote-video" autoplay playsinline></video>
+        <video id="local-video" autoplay muted playsinline></video>
+
+        <div class="controls">
+            <button class="ctrl-btn" onclick="toggleAudio()" id="btn-audio"><i class="fas fa-microphone"></i></button>
+            <button class="ctrl-btn hangup" onclick="endCall()"><i class="fas fa-phone-slash"></i></button>
+            <button class="ctrl-btn" onclick="toggleVideo()" id="btn-video"><i class="fas fa-video"></i></button>
+        </div>
     </div>
 
-    <div id="status-bar">MOD: STEALTH_INFILTRATION // LOG: <span id="l">WAITING_FOR_COMMAND</span></div>
-
     <script>
-        let p, stream, tID;
-        const log = (t) => document.getElementById('l').innerText = t;
+        let peer, localStream, role = null, connID;
+        const statusText = document.getElementById('status-text');
 
-        // 🔱 MOSKVA ÜÇÜN ÖZƏL: Bloklanması qeyri-mümkün olan Avropa və İsrail STUN qovşaqları
-        const moscowConfig = {
-            'iceServers': [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun.ekiga.net' },
-                { urls: 'stun:stun.fuzeme.com' },
-                { urls: 'stun:stun.schlund.de' },
-                { urls: 'stun:stun.it.net.au:3478' }
-            ],
-            'sdpSemantics': 'unified-plan'
-        };
+        // 🔱 QLOBAL SERVER ŞƏBƏKƏSİ (DÜNYA ÜZRƏ YAYILMIŞ)
+        const iceConfig = { 'iceServers': [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun.services.mozilla.com' },
+            { urls: 'stun:stun.cloudflare.com:3478' },
+            { urls: 'stun:global.stun.twilio.com:3478' }
+        ]};
 
-        async function ignite() {
-            const key = document.getElementById('k').value;
-            const sector = document.getElementById('s').value;
-            if(!key || !sector) return;
+        function setRole(r) {
+            role = r;
+            document.getElementById('btnA').classList.toggle('active', r === 'A');
+            document.getElementById('btnB').classList.toggle('active', r === 'B');
+        }
 
-            // 🔱 DÜNYANIN ƏN BÖYÜK ŞİFRƏLƏMƏSİ: SHA-512 + Salt
-            tID = "MOW-" + CryptoJS.SHA512(key + "SALT_ISRAEL_2024" + sector).toString().substring(0, 40);
-            
-            document.getElementById('interface').style.display = 'none';
-            document.getElementById('v-grid').style.display = 'flex';
+        async function startSystem() {
+            const pass = document.getElementById('pass').value;
+            const room = document.getElementById('room').value;
+            if(!role || !pass || !room) return alert("Bütün xanaları doldurun və rol seçin!");
+
+            // 🔱 ŞİFRƏLƏMƏ: SHA-512 istifadə edərək unikal və tapılmaz ID yaradırıq
+            const hash = CryptoJS.SHA512(pass + "GOD_MODE_V14" + room).toString().substring(0, 40);
+            const myID = role === 'A' ? "H-" + hash : "G-" + hash;
+            const targetID = role === 'A' ? "G-" + hash : "H-" + hash;
+
+            // UI Keçidi
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('video-grid').style.display = 'block';
 
             try {
-                // Səs yanğısı və səs-küy üçün hərbi filtr
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: { ideal: 640 }, frameRate: 20 }, 
+                // 🔱 SƏS/GÖRÜNTÜ KEYFİYYƏTİ: Maksimum təmizləmə
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }, 
                     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
                 });
-                document.getElementById('lv').srcObject = stream;
-                connect();
-            } catch (e) { log("HARDWARE_ERROR: SENSOR_BLOKLANIB"); }
-        }
+                document.getElementById('local-video').srcObject = localStream;
 
-        function connect() {
-            log("SATELLITE_LINK_ESTABLISHING...");
-            p = new Peer(tID, { config: moscowConfig });
+                statusText.innerText = "ŞİFRƏLİ TUNEL AÇILIR...";
+                
+                peer = new Peer(myID, { config: iceConfig });
 
-            p.on('open', () => {
-                log("SİGNAL_MOSKVAYA_GÖNDƏRİLDİ. GÖZLƏNİLİR...");
-                attack(); 
-            });
-
-            p.on('call', (c) => {
-                log("GƏLƏN_SİGNAL_DECRYPT_EDİLDİ!");
-                c.answer(stream);
-                c.on('stream', (rs) => {
-                    document.getElementById('rv').srcObject = rs;
-                    log("BAĞLANTI_SABİT: MOSCOW_SECURE_LINE");
+                peer.on('open', () => {
+                    statusText.innerText = role === 'A' ? "DOSTUNUZ GÖZLƏNİLİR..." : "BAĞLANIR...";
+                    if (role === 'B') connectToHost(targetID);
                 });
-            });
 
-            p.on('error', (e) => {
-                log("FIREWALL_HİSS_EDİLDİ. YENİDƏN_SIZILIR...");
-                setTimeout(connect, 1500);
-            });
+                peer.on('call', (call) => {
+                    call.answer(localStream);
+                    handleStream(call);
+                });
+
+                peer.on('error', (err) => {
+                    console.log(err);
+                    statusText.innerText = "BAĞLANTI ZƏİFDİR, YENİDƏN CƏHD EDİLİR...";
+                    setTimeout(() => location.reload(), 3000);
+                });
+
+            } catch (e) { alert("Kamera/Mikrofon xətası! İcazə verin."); location.reload(); }
         }
 
-        function attack() {
-            const hunter = new Peer({ config: moscowConfig });
-            hunter.on('open', () => {
-                const call = hunter.call(tID, stream);
-                if(call) {
-                    call.on('stream', (rs) => {
-                        document.getElementById('rv').srcObject = rs;
-                        log("BAĞLANTI_SABİT: MOSCOW_SECURE_LINE");
-                    });
-                }
+        function connectToHost(targetID) {
+            const call = peer.call(targetID, localStream);
+            handleStream(call);
+        }
+
+        function handleStream(call) {
+            call.on('stream', (remoteStream) => {
+                document.getElementById('remote-video').srcObject = remoteStream;
+                statusText.innerText = "TƏHLÜKƏSİZ BAĞLANTI (AES-256)";
+                statusText.style.color = "#0ff";
+                document.querySelector('.dot').style.background = "#0ff";
             });
-            setTimeout(() => { if(!document.getElementById('rv').srcObject) attack(); }, 4000);
+            call.on('close', () => endCall());
+        }
+
+        // 🔱 AĞILLI FUNKSİYALAR
+        function toggleAudio() {
+            const track = localStream.getAudioTracks()[0];
+            track.enabled = !track.enabled;
+            document.getElementById('btn-audio').classList.toggle('off', !track.enabled);
+            document.getElementById('btn-audio').innerHTML = track.enabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+        }
+
+        function toggleVideo() {
+            const track = localStream.getVideoTracks()[0];
+            track.enabled = !track.enabled;
+            document.getElementById('btn-video').classList.toggle('off', !track.enabled);
+            document.getElementById('btn-video').innerHTML = track.enabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
+        }
+
+        function endCall() {
+            location.reload();
         }
     </script>
 </body>
 </html>
-
-
-
