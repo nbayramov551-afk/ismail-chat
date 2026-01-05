@@ -3,173 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHANTOM_GOD_MODE</title>
+    <title>PHANTOM_V18_FINAL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; }
         
-        /* GİRİŞ EKRANI */
-        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle at center, #111 0%, #000 100%); z-index: 2; position: relative; }
-        .cyber-box { width: 90%; max-width: 350px; padding: 30px; border: 1px solid #333; background: rgba(10,10,10,0.95); border-radius: 12px; text-align: center; box-shadow: 0 0 40px rgba(0, 255, 255, 0.05); }
-        .logo { font-size: 24px; font-weight: 900; letter-spacing: 3px; background: linear-gradient(90deg, #00f, #0ff); -webkit-background-clip: text; color: transparent; margin-bottom: 20px; }
+        /* GİRİŞ PANELİ */
+        #login-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .cyber-panel { border: 2px solid #0f0; padding: 25px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 0 30px rgba(0, 255, 0, 0.2); background: rgba(5, 20, 5, 0.95); border-radius: 10px; }
         
-        input { background: #080808; border: 1px solid #222; color: #fff; padding: 15px; margin: 8px 0; width: 100%; box-sizing: border-box; outline: none; border-radius: 8px; font-size: 14px; text-align: center; transition: 0.3s; }
-        input:focus { border-color: #0ff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); }
-        
-        .role-selector { display: flex; gap: 10px; margin: 15px 0; }
-        .role-btn { flex: 1; padding: 12px; border: 1px solid #333; background: #000; color: #666; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; transition: 0.3s; }
-        .role-btn.active { background: #001133; border-color: #00f; color: #fff; box-shadow: 0 0 15px rgba(0, 80, 255, 0.4); }
+        input { background: #000; border: 1px solid #333; color: #fff; padding: 15px; margin: 8px 0; width: 100%; text-align: center; font-weight: bold; font-family: monospace; outline: none; border-radius: 5px; }
+        input:focus { border-color: #0f0; }
 
-        .connect-btn { width: 100%; padding: 18px; border: none; background: linear-gradient(90deg, #000044, #000088); color: #fff; font-size: 14px; font-weight: bold; letter-spacing: 2px; border-radius: 8px; cursor: pointer; margin-top: 10px; box-shadow: 0 5px 20px rgba(0,0,255,0.2); transition: 0.3s; }
-        .connect-btn:active { transform: scale(0.98); }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { flex: 1; padding: 15px; background: #002200; color: #0f0; border: 1px solid #0f0; cursor: pointer; font-weight: bold; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
+        .btn.active { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
+        .btn-start { width: 100%; background: #0f0; color: #000; margin-top: 15px; border: none; font-size: 16px; letter-spacing: 2px; }
 
-        /* VİDEO EKRANI */
-        #video-grid { display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; background: #000; }
-        video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        #local-video { width: 100px; height: 150px; bottom: 100px; right: 20px; top: auto; left: auto; border-radius: 10px; border: 2px solid #333; z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        #remote-video { z-index: 1; }
+        /* VİDEO SAHƏSİ */
+        #mission-layer { display: none; width: 100vw; height: 100vh; position: relative; background: #111; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        #remote-video { position: absolute; top: 0; left: 0; z-index: 1; }
+        #local-video { position: absolute; bottom: 100px; right: 20px; width: 100px; height: 140px; border: 2px solid #0f0; z-index: 10; background: #000; border-radius: 8px; }
 
-        /* NƏZARƏT PANELİ (APP FEEL) */
-        .controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 20; background: rgba(20,20,20,0.8); padding: 15px 25px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid #333; }
-        .ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #333; color: #fff; font-size: 18px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-        .ctrl-btn.off { background: #f00; color: #fff; }
-        .ctrl-btn.hangup { background: #f00; width: 50px; }
+        /* NƏZARƏT DÜYMƏLƏRİ */
+        .controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 20; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 50px; border: 1px solid #333; }
+        .ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: none; background: #222; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .ctrl-btn.off { background: #555; color: #aaa; position: relative; }
+        .ctrl-btn.off::after { content: '/'; position: absolute; font-size: 24px; color: #000; }
+        .ctrl-btn.hang { background: #f00; }
 
-        /* STATUS BAR */
-        .status-pill { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px; font-size: 10px; color: #0f0; border: 1px solid #0f0; z-index: 20; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; }
-        .dot { width: 8px; height: 8px; background: #0f0; border-radius: 50%; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        /* MƏCBURİ KİLİD AÇMA DÜYMƏSİ (RUSİYA FİX) */
+        #unlock-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); z-index: 100; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .unlock-btn {
+            width: 200px; height: 200px; border-radius: 50%; background: #f00; color: #fff;
+            border: 5px solid #fff; font-size: 20px; font-weight: bold; cursor: pointer;
+            animation: pulse 1s infinite; display: flex; align-items: center; justify-content: center; text-align: center;
+            box-shadow: 0 0 50px #f00;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
+        #status-log { position: fixed; top: 10px; width: 100%; text-align: center; color: #0f0; font-size: 12px; z-index: 15; text-shadow: 0 0 5px #000; background: rgba(0,0,0,0.5); padding: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="cyber-box">
-            <div class="logo">PHANTOM V14</div>
-            <p style="font-size: 10px; color: #888; margin-bottom: 20px;">GOD_MODE // QUANTUM_ENCRYPTION</p>
+    <div id="login-layer">
+        <div class="cyber-panel">
+            <h2 style="margin:0 0 10px 0; letter-spacing:3px;">PHANTOM V18</h2>
+            <p style="font-size:10px; color:#666; margin-bottom:20px;">ANTI-DPI / AUDIO UNLOCK SYSTEM</p>
             
             <input type="password" id="pass" placeholder="GİZLİ ŞİFRƏ (TOKEN)">
             <input type="text" id="room" placeholder="OTAQ ADI">
             
-            <div class="role-selector">
-                <div class="role-btn" id="btnA" onclick="setRole('A')">HOST (SƏN)</div>
-                <div class="role-btn" id="btnB" onclick="setRole('B')">GUEST (DOSTUN)</div>
+            <div class="btn-group">
+                <button class="btn" id="btnA" onclick="setMode('A')">SƏN (AZ)</button>
+                <button class="btn" id="btnB" onclick="setMode('B')">DOSTUN (RU)</button>
             </div>
-
-            <button class="connect-btn" onclick="startSystem()">BAĞLANTI QUR</button>
+            
+            <button class="btn btn-start" onclick="ignite()">SİSTEMİ BAŞLAT</button>
         </div>
     </div>
 
-    <div id="video-grid">
-        <div class="status-pill"><div class="dot"></div><span id="status-text">HAZIRLANIR...</span></div>
-        <video id="remote-video" autoplay playsinline></video>
+    <div id="mission-layer">
+        <div id="status-log">SİSTEM HAZIRLANIR...</div>
+        <video id="remote-video" playsinline></video>
         <video id="local-video" autoplay muted playsinline></video>
 
         <div class="controls">
-            <button class="ctrl-btn" onclick="toggleAudio()" id="btn-audio"><i class="fas fa-microphone"></i></button>
-            <button class="ctrl-btn hangup" onclick="endCall()"><i class="fas fa-phone-slash"></i></button>
-            <button class="ctrl-btn" onclick="toggleVideo()" id="btn-video"><i class="fas fa-video"></i></button>
+            <button class="ctrl-btn" onclick="toggleMic(this)"><i class="fas fa-microphone"></i></button>
+            <button class="ctrl-btn hang" onclick="location.reload()"><i class="fas fa-phone-slash"></i></button>
+            <button class="ctrl-btn" onclick="toggleCam(this)"><i class="fas fa-video"></i></button>
         </div>
     </div>
 
+    <div id="unlock-overlay">
+        <div class="unlock-btn" onclick="unlockSystem()">
+            BAS <br> GÖRÜNTÜNÜ AÇ
+        </div>
+        <p style="color:#fff; margin-top:20px;">SƏSİ EŞİTMƏK ÜÇÜN BASMALISAN!</p>
+    </div>
+
     <script>
-        let peer, localStream, role = null, connID;
-        const statusText = document.getElementById('status-text');
+        let peer, myStream, mode = null;
+        const log = (t) => document.getElementById('status-log').innerText = t;
 
-        // 🔱 QLOBAL SERVER ŞƏBƏKƏSİ (DÜNYA ÜZRƏ YAYILMIŞ)
-        const iceConfig = { 'iceServers': [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun.services.mozilla.com' },
-            { urls: 'stun:stun.cloudflare.com:3478' },
-            { urls: 'stun:global.stun.twilio.com:3478' }
-        ]};
-
-        function setRole(r) {
-            role = r;
-            document.getElementById('btnA').classList.toggle('active', r === 'A');
-            document.getElementById('btnB').classList.toggle('active', r === 'B');
+        function setMode(m) {
+            mode = m;
+            document.getElementById('btnA').className = `btn ${m==='A'?'active':''}`;
+            document.getElementById('btnB').className = `btn ${m==='B'?'active':''}`;
         }
 
-        async function startSystem() {
-            const pass = document.getElementById('pass').value;
-            const room = document.getElementById('room').value;
-            if(!role || !pass || !room) return alert("Bütün xanaları doldurun və rol seçin!");
+        // 🔱 GOOGLE + PUBLIC STUNS (Rusiyanı aşmaq üçün qarışıq serverlər)
+        const iceConfig = { 
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun.bg.mtel.net:3478' }
+            ],
+            iceTransportPolicy: 'all' 
+        };
 
-            // 🔱 ŞİFRƏLƏMƏ: SHA-512 istifadə edərək unikal və tapılmaz ID yaradırıq
-            const hash = CryptoJS.SHA512(pass + "GOD_MODE_V14" + room).toString().substring(0, 40);
-            const myID = role === 'A' ? "H-" + hash : "G-" + hash;
-            const targetID = role === 'A' ? "G-" + hash : "H-" + hash;
+        async function ignite() {
+            if(!mode) return alert("Kimsən? (Sən və ya Dostun) seç!");
+            const pVal = document.getElementById('pass').value;
+            const rVal = document.getElementById('room').value;
+            if(!pVal || !rVal) return alert("Şifrə və Otaq boş ola bilməz!");
 
-            // UI Keçidi
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('video-grid').style.display = 'block';
+            const hash = CryptoJS.SHA256(pVal + "V18_FINAL" + rVal).toString().substring(0, 16);
+            
+            // İnterfeysi dəyiş
+            document.getElementById('login-layer').style.display = 'none';
+            document.getElementById('mission-layer').style.display = 'block';
+            log("KAMERA AÇILIR...");
 
             try {
-                // 🔱 SƏS/GÖRÜNTÜ KEYFİYYƏTİ: Maksimum təmizləmə
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" }, 
+                // 🔱 LOW-DATA MODE: DPI-ya ilişməmək üçün 320x240
+                myStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 320, height: 240, frameRate: 15, facingMode: "user" }, 
                     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
                 });
-                document.getElementById('local-video').srcObject = localStream;
+                document.getElementById('local-video').srcObject = myStream;
 
-                statusText.innerText = "ŞİFRƏLİ TUNEL AÇILIR...";
-                
+                const myID = (mode === 'A' ? 'AZ-' : 'RU-') + hash;
+                const targetID = (mode === 'A' ? 'RU-' : 'AZ-') + hash;
+
                 peer = new Peer(myID, { config: iceConfig });
 
                 peer.on('open', () => {
-                    statusText.innerText = role === 'A' ? "DOSTUNUZ GÖZLƏNİLİR..." : "BAĞLANIR...";
-                    if (role === 'B') connectToHost(targetID);
+                    log(mode === 'A' ? "DOSTUNU GÖZLƏYİRİK..." : "BAĞLANTIQURULUR...");
+                    if(mode === 'B') connectToHost(targetID);
                 });
 
                 peer.on('call', (call) => {
-                    call.answer(localStream);
+                    call.answer(myStream);
                     handleStream(call);
                 });
 
                 peer.on('error', (err) => {
-                    console.log(err);
-                    statusText.innerText = "BAĞLANTI ZƏİFDİR, YENİDƏN CƏHD EDİLİR...";
+                    log("XƏTA: " + err.type);
                     setTimeout(() => location.reload(), 3000);
                 });
 
-            } catch (e) { alert("Kamera/Mikrofon xətası! İcazə verin."); location.reload(); }
+            } catch(e) { alert("Kameraya icazə verilmədi!"); location.reload(); }
         }
 
-        function connectToHost(targetID) {
-            const call = peer.call(targetID, localStream);
-            handleStream(call);
+        function connectToHost(id) {
+            // Rusiya tərəfi cəhd edir
+            setTimeout(() => {
+                const call = peer.call(id, myStream);
+                handleStream(call);
+            }, 2000);
         }
 
         function handleStream(call) {
             call.on('stream', (remoteStream) => {
                 document.getElementById('remote-video').srcObject = remoteStream;
-                statusText.innerText = "TƏHLÜKƏSİZ BAĞLANTI (AES-256)";
-                statusText.style.color = "#0ff";
-                document.querySelector('.dot').style.background = "#0ff";
+                log("SİQNAL TUTULDU! AÇILMASI GÖZLƏNİLİR...");
+                
+                // 🔱 VACİB: Bağlantı gələn kimi "KİLİDİ AÇ" ekranını gətiririk
+                document.getElementById('unlock-overlay').style.display = 'flex';
             });
-            call.on('close', () => endCall());
         }
 
-        // 🔱 AĞILLI FUNKSİYALAR
-        function toggleAudio() {
-            const track = localStream.getAudioTracks()[0];
+        // 🔱 BRAUZERİN SƏS MÜHƏRRİKİNİ MƏCBURİ OYATMAQ
+        function unlockSystem() {
+            const v = document.getElementById('remote-video');
+            v.play().then(() => {
+                document.getElementById('unlock-overlay').style.display = 'none';
+                log("🟢 BAĞLANTI SABİTDİR - TƏHLÜKƏSİZ");
+            }).catch(e => alert("Sistem xətası: Yenidən bas!"));
+        }
+
+        // Funsiyalar (Səs/Video kəsmək)
+        function toggleMic(btn) {
+            const track = myStream.getAudioTracks()[0];
             track.enabled = !track.enabled;
-            document.getElementById('btn-audio').classList.toggle('off', !track.enabled);
-            document.getElementById('btn-audio').innerHTML = track.enabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
+            btn.classList.toggle('off', !track.enabled);
+            btn.innerHTML = track.enabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
         }
 
-        function toggleVideo() {
-            const track = localStream.getVideoTracks()[0];
+        function toggleCam(btn) {
+            const track = myStream.getVideoTracks()[0];
             track.enabled = !track.enabled;
-            document.getElementById('btn-video').classList.toggle('off', !track.enabled);
-            document.getElementById('btn-video').innerHTML = track.enabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
-        }
-
-        function endCall() {
-            location.reload();
+            btn.classList.toggle('off', !track.enabled);
+            btn.innerHTML = track.enabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
         }
     </script>
 </body>
