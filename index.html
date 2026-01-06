@@ -11,36 +11,25 @@
     
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        /* GİRİŞ */
         #login-screen { position: fixed; inset: 0; z-index: 3000; background: #000; display: flex; align-items: center; justify-content: center; }
-        .terminal-box { border: 1px solid #0f0; padding: 25px; width: 300px; text-align: center; background: #050505; }
-        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; text-align: center; }
-        .start-btn { width: 100%; padding: 15px; background: #0f0; color: #000; font-weight: bold; cursor: pointer; border: none; }
+        .terminal-box { border: 1px solid #0f0; padding: 25px; width: 300px; text-align: center; background: #050505; border-radius:15px; }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; text-align: center; border-radius:5px; }
+        .start-btn { width: 100%; padding: 15px; background: #0f0; color: #000; font-weight: bold; cursor: pointer; border: none; border-radius:5px; transition: 0.3s; }
+        .start-btn:active { transform: scale(0.95); background: #0c0; }
 
-        /* RADAR */
         #radar-screen { position: fixed; inset: 0; z-index: 2000; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .radar { width: 120px; height: 120px; border: 2px solid #0f0; border-radius: 50%; position: relative; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(0,255,0,0.7);} 70% {box-shadow: 0 0 0 30px rgba(0,255,0,0);} 100% {box-shadow: 0 0 0 0 rgba(0,255,0,0);} }
 
-        /* ƏSAS UI */
         #main-ui { display: none; width: 100%; height: 100%; position: relative; }
         #remote-video { width: 100%; height: 100%; object-fit: cover; background: #111; }
-        
-        /* SƏNİN GÖRÜNTÜN (AŞAĞIDA) */
-        #local-video { 
-            position: absolute; bottom: 100px; right: 20px; 
-            width: 110px; height: 150px; 
-            border: 2px solid #0f0; z-index: 10; 
-            border-radius: 8px; object-fit: cover; 
-        }
+        #local-video { position: absolute; bottom: 100px; right: 20px; width: 110px; height: 150px; border: 2px solid #0f0; z-index: 10; border-radius: 8px; object-fit: cover; background: #000; }
 
-        /* EMOJİ VƏ İDARƏETMƏ */
         .emoji-bar { position: absolute; top: 40%; right: 10px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; z-index: 20; }
-        .emoji-btn { font-size: 25px; background: rgba(0,0,0,0.5); border: 1px solid #0f0; border-radius: 50%; width: 45px; height: 45px; color: #fff; }
+        .emoji-btn { font-size: 25px; background: rgba(0,0,0,0.5); border: 1px solid #0f0; border-radius: 50%; width: 45px; height: 45px; color: #fff; cursor:pointer; }
 
-        .control-panel { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 20; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 50px; border: 1px solid #0f0; }
-        .btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: #222; color: #fff; font-size: 18px; }
+        .control-panel { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 20; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 50px; border: 1px solid #0f0; backdrop-filter: blur(5px); }
+        .btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: #222; color: #fff; font-size: 18px; cursor:pointer; }
         .active-red { background: #f00 !important; }
 
         .floating-emoji { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; z-index: 100; animation: pop 1.5s forwards; pointer-events: none; }
@@ -51,10 +40,10 @@
 
     <div id="login-screen">
         <div class="terminal-box">
-            <h2 style="color: #0f0;">PHANTOM V23</h2>
-            <p style="font-size: 10px; color: #555;">BYPASSING RUSSIAN FIREWALL...</p>
-            <input type="password" id="tk" placeholder="TOKEN">
-            <input type="text" id="rm" placeholder="ROOM_ID">
+            <h2 style="color: #0f0; margin-top:0;">PHANTOM V24</h2>
+            <p style="font-size: 10px; color: #555;">ANTI-BAN TUNNEL & MULTI-CAM</p>
+            <input type="password" id="tk" placeholder="TOKEN (GİZLİ ŞİFRƏ)">
+            <input type="text" id="rm" placeholder="ROOM_ID (OTAQ)">
             <button class="start-btn" onclick="ignite('A')">HOST (AZ)</button>
             <button class="start-btn" onclick="ignite('B')" style="margin-top:10px; background:#004400; color:#fff;">GUEST (RU)</button>
         </div>
@@ -62,31 +51,41 @@
 
     <div id="radar-screen">
         <div class="radar"></div>
-        <p style="margin-top:20px;" id="status-text">TUNEL QURULUR...</p>
+        <p style="margin-top:20px; color:#0f0;" id="status-text">TUNEL QURULUR...</p>
     </div>
 
     <div id="main-ui">
         <video id="remote-video" playsinline autoplay></video>
         <video id="local-video" autoplay muted playsinline></video>
-
         <div class="emoji-bar" id="emoji-list"></div>
-
         <div class="control-panel">
             <button class="btn" onclick="toggleMute()" id="m-btn"><i class="fas fa-microphone"></i></button>
             <button class="btn" onclick="toggleCam()" id="c-btn"><i class="fas fa-video"></i></button>
+            <button class="btn" onclick="switchCamera()" id="s-btn" style="color:#0f0;"><i class="fas fa-camera-rotate"></i></button>
             <button class="btn" onclick="location.reload()"><i class="fas fa-sync"></i></button>
             <button class="btn" onclick="window.location.href='https://google.com'"><i class="fas fa-times"></i></button>
         </div>
     </div>
 
     <script>
-        let peer, localStream, activeConn, role, targetID, myID;
+        let peer, localStream, activeConn, currentCall, role, targetID, myID;
+        let currentFacingMode = "user"; // "user" = ön, "environment" = arxa
+        
         const ice = { iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun.voip.aebc.com:3478' },
-            { urls: 'stun:stun.sipgate.net:3478' }
-        ], iceCandidatePoolSize: 10 };
+            { urls: 'stun:global.stun.twilio.com:3478' }
+        ]};
+
+        async function getMedia(facing = "user") {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            return await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: facing, width: {ideal: 640}, frameRate: {ideal: 20} }, 
+                audio: { echoCancellation: true, noiseSuppression: true } 
+            });
+        }
 
         async function ignite(selRole) {
             role = selRole;
@@ -102,45 +101,33 @@
             targetID = (role === 'A' ? 'RU-' : 'AZ-') + hash;
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: {ideal: 480}, frameRate: {ideal: 15} }, 
-                    audio: { echoCancellation: true, noiseSuppression: true } 
-                });
+                localStream = await getMedia();
                 document.getElementById('local-video').srcObject = localStream;
                 
-                peer = new Peer(myID, { config: ice, debug: 1 });
+                peer = new Peer(myID, { config: ice });
 
-                peer.on('open', () => {
-                    // RUSİYA ÜÇÜN ÖZƏL: Hər iki tərəf eyni anda axtarışa başlayır
-                    startBypassLoop();
-                });
-
+                peer.on('open', () => startBypassLoop());
                 peer.on('call', call => {
+                    currentCall = call;
                     call.answer(localStream);
                     setupRemoteStream(call);
                 });
-
                 peer.on('connection', conn => {
                     activeConn = conn;
                     conn.on('data', data => { if(data.type==='emoji') showEmoji(data.val); });
                 });
-
-            } catch(e) { alert("Kamera xətası!"); }
+            } catch(e) { alert("Kamera xətası! İcazə verin."); location.reload(); }
         }
 
-        // --- BYPASS LOGIC (Əsas Güc Burdadır) ---
         function startBypassLoop() {
             const connect = () => {
                 if(document.getElementById('main-ui').style.display === 'block') return;
-                
-                // Həm zəng et, həm data kanalı aç (Firewall-u çaşdırmaq üçün)
                 const call = peer.call(targetID, localStream);
-                const conn = peer.connect(targetID, { reliable: true });
-
+                currentCall = call;
+                const conn = peer.connect(targetID);
                 setupRemoteStream(call);
-                
                 activeConn = conn;
-                setTimeout(connect, 4000); // 4 saniyədən bir təkrarla (Bağlantı tutana qədər)
+                setTimeout(connect, 5000); 
             };
             connect();
         }
@@ -151,19 +138,30 @@
                 rv.srcObject = stream;
                 document.getElementById('radar-screen').style.display = 'none';
                 document.getElementById('main-ui').style.display = 'block';
-                
-                // Avto-Səs aktivləşdirmə (Brauzer blokuna qarşı)
-                rv.play().catch(() => {
-                    document.body.addEventListener('click', () => rv.play(), {once: true});
-                });
+                rv.play().catch(() => {});
             });
+        }
 
-            // Qırmızı işıq (Bağlantı qopması) həlli
-            call.peerConnection.oniceconnectionstatechange = () => {
-                if(call.peerConnection.iceConnectionState === 'failed') {
-                    call.peerConnection.restartIce();
+        // --- KAMERA ÇEVİRMƏ (ATILMADAN) ---
+        async function switchCamera() {
+            currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+            try {
+                const newStream = await getMedia(currentFacingMode);
+                const videoTrack = newStream.getVideoTracks()[0];
+                
+                // 1. Öz ekranını yenilə
+                document.getElementById('local-video').srcObject = newStream;
+                
+                // 2. Mövcud zəngdəki görüntünü dəyiş (Bağlantını qoparmadan)
+                if (currentCall && currentCall.peerConnection) {
+                    const sender = currentCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                    if (sender) sender.replaceTrack(videoTrack);
                 }
-            };
+                
+                localStream = newStream; // Yeni axını yadda saxla
+            } catch (e) {
+                alert("Kamera dəyişdirilə bilmədi!");
+            }
         }
 
         // EMOJİ SİSTEMİ
@@ -185,16 +183,11 @@
             div.className = 'floating-emoji';
             div.innerText = val;
             document.body.appendChild(div);
-            
-            // Canlı Səslər
             const synth = new Tone.MembraneSynth().toDestination();
-            if(val === '😘' || val === '💋') synth.triggerAttackRelease("G3", "8n");
-            else synth.triggerAttackRelease("C2", "8n");
-
+            synth.triggerAttackRelease(val === '😘' ? "G3" : "C2", "8n");
             setTimeout(() => div.remove(), 1500);
         }
 
-        // İDARƏETMƏ
         function toggleMute() {
             localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled;
             document.getElementById('m-btn').classList.toggle('active-red');
