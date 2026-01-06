@@ -3,377 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Yüklənir...</title>
+    <title>Sistem...</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* --- 1. MOBİL OPTİMİZASİYA VƏ DİZAYN --- */
-        body { 
-            background: #000; color: #0f0; 
-            font-family: 'Courier New', monospace; 
-            margin: 0; overflow: hidden; height: 100vh; width: 100vw;
-            user-select: none; /* Mətni seçməyi qadağan et */
-        }
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; width: 100vw; }
+        
+        /* GİRİŞ */
+        #login-screen { position: fixed; inset: 0; z-index: 3000; background: #000; display: flex; align-items: center; justify-content: center; }
+        .terminal-box { border: 1px solid #0f0; padding: 25px; width: 300px; text-align: center; background: #050505; }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; text-align: center; }
+        .start-btn { width: 100%; padding: 15px; background: #0f0; color: #000; font-weight: bold; cursor: pointer; border: none; }
 
-        /* GİRİŞ EKRANI */
-        #login-screen { 
-            position: fixed; inset: 0; z-index: 3000; 
-            background: radial-gradient(circle at center, #0a1f0a 0%, #000 100%); 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-        }
-        .terminal-box { 
-            border: 1px solid #0f0; padding: 20px; width: 85%; max-width: 320px;
-            background: rgba(0,0,0,0.9); box-shadow: 0 0 25px rgba(0, 255, 0, 0.4); 
-            border-radius: 12px; text-align: center; 
-        }
-        input { 
-            background: #111; border: 1px solid #333; color: #0f0; 
-            padding: 15px; margin: 10px 0; width: 100%; border-radius: 5px;
-            box-sizing: border-box; outline: none; text-align: center; font-size: 16px;
-        }
-        input:focus { border-color: #0f0; box-shadow: 0 0 10px #0f0; }
+        /* RADAR */
+        #radar-screen { position: fixed; inset: 0; z-index: 2000; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .radar { width: 120px; height: 120px; border: 2px solid #0f0; border-radius: 50%; position: relative; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(0,255,0,0.7);} 70% {box-shadow: 0 0 0 30px rgba(0,255,0,0);} 100% {box-shadow: 0 0 0 0 rgba(0,255,0,0);} }
 
-        .start-btn { 
-            width: 100%; padding: 15px; margin-top: 10px;
-            background: linear-gradient(45deg, #004d00, #00b300); 
-            color: #fff; font-weight: bold; font-size: 16px;
-            cursor: pointer; border: none; border-radius: 5px; text-transform: uppercase; 
-            box-shadow: 0 4px 15px rgba(0,255,0,0.3); transition: 0.2s;
-        }
-        .start-btn:active { transform: scale(0.96); }
-
-        /* RADAR (AXTARIŞ) EKRANI */
-        #radar-screen {
-            position: fixed; inset: 0; z-index: 2000; background: #000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .radar {
-            width: 150px; height: 150px; border: 2px solid #0f0; border-radius: 50%;
-            position: relative; box-shadow: 0 0 20px #0f0, inset 0 0 20px #0f0;
-            background: repeating-radial-gradient(transparent 0, transparent 19px, #0f0 20px);
-        }
-        .scan-line {
-            width: 50%; height: 2px; background: #0f0;
-            position: absolute; top: 50%; left: 50%; transform-origin: 0 0;
-            animation: scan 2s infinite linear;
-            box-shadow: 0 0 10px #fff;
-        }
-        @keyframes scan { 0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);} }
-        .radar-text { margin-top: 20px; color: #0f0; font-size: 14px; animation: blink 1s infinite; }
-
-        /* ƏSAS EKRAN */
+        /* ƏSAS UI */
         #main-ui { display: none; width: 100%; height: 100%; position: relative; }
+        #remote-video { width: 100%; height: 100%; object-fit: cover; background: #111; }
         
-        #remote-video { 
-            width: 100%; height: 100%; object-fit: cover; 
-            transform: scale(1.02); /* Kənar boşluqları gizlət */
-        }
-        
+        /* SƏNİN GÖRÜNTÜN (AŞAĞIDA) */
         #local-video { 
-            position: absolute; top: 15px; right: 15px; 
-            width: 90px; height: 120px; 
-            border: 2px solid #fff; z-index: 10; 
-            border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.8);
-            object-fit: cover; background: #000;
+            position: absolute; bottom: 100px; right: 20px; 
+            width: 110px; height: 150px; 
+            border: 2px solid #0f0; z-index: 10; 
+            border-radius: 8px; object-fit: cover; 
         }
 
-        /* EMOJİ BAR (Sağ tərəf - sürüşdürülə bilən) */
-        .emoji-bar {
-            position: absolute; top: 50%; right: 10px; 
-            transform: translateY(-50%);
-            display: flex; flex-direction: column; gap: 15px; z-index: 20;
-            max-height: 60vh; overflow-y: scroll; padding: 10px 5px;
-            /* Scrollbar gizlət */
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .emoji-bar::-webkit-scrollbar { display: none; }
-        
-        .emoji-btn {
-            font-size: 32px; background: rgba(0,0,0,0.4); 
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; 
-            width: 50px; height: 50px; cursor: pointer;
-            transition: transform 0.2s; backdrop-filter: blur(4px);
-        }
-        .emoji-btn:active { transform: scale(1.3); background: rgba(0,255,0,0.3); }
+        /* EMOJİ VƏ İDARƏETMƏ */
+        .emoji-bar { position: absolute; top: 40%; right: 10px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; z-index: 20; }
+        .emoji-btn { font-size: 25px; background: rgba(0,0,0,0.5); border: 1px solid #0f0; border-radius: 50%; width: 45px; height: 45px; color: #fff; }
 
-        /* ALT PANEL (İDARƏETMƏ) */
-        .control-panel {
-            position: absolute; bottom: 30px; left: 50%; 
-            transform: translateX(-50%);
-            display: flex; gap: 15px; z-index: 20;
-            background: rgba(20, 20, 20, 0.85); padding: 10px 25px; 
-            border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); 
-            backdrop-filter: blur(10px); width: 80%; justify-content: center;
-        }
-        .btn {
-            width: 45px; height: 45px; border-radius: 50%; border: none;
-            background: rgba(255, 255, 255, 0.1); color: white; font-size: 20px;
-            cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center;
-        }
-        .btn:active { transform: scale(0.9); }
-        .active-red { background: #ff4444 !important; color: white; }
-        .active-cyan { background: cyan !important; color: black; box-shadow: 0 0 15px cyan; }
+        .control-panel { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 20; background: rgba(0,0,0,0.8); padding: 10px 20px; border-radius: 50px; border: 1px solid #0f0; }
+        .btn { width: 45px; height: 45px; border-radius: 50%; border: none; background: #222; color: #fff; font-size: 18px; }
+        .active-red { background: #f00 !important; }
 
-        /* CANLI EMOJİ ANİMASİYASI */
-        .floating-emoji {
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 120px; z-index: 100; pointer-events: none;
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
-            animation: bounceIn 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
-        }
-        @keyframes bounceIn {
-            0% { transform: translate(-50%, -50%) scale(0) rotate(-45deg); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.5) rotate(0deg); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(2) rotate(10deg); opacity: 0; filter: blur(10px); }
-        }
-
-        @keyframes blink { 50% { opacity: 0.3; } }
+        .floating-emoji { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; z-index: 100; animation: pop 1.5s forwards; pointer-events: none; }
+        @keyframes pop { 0% {transform:translate(-50%,-50%) scale(0.5); opacity:1;} 100% {transform:translate(-50%,-150%) scale(2); opacity:0;} }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="terminal-box">
-            <h2 style="letter-spacing: 3px; color: #fff;">PHANTOM <span style="color:#0f0">V22</span></h2>
-            <p style="font-size: 11px; color: #aaa; margin-bottom: 20px;">SECURE P2P TUNNEL // AZ-RU LINK</p>
-            
-            <input type="password" id="tk" placeholder="Şifrə (Məs: 1234)" value="">
-            <input type="text" id="rm" placeholder="Otaq Adı (Məs: baku)" value="">
-            
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="start-btn" onclick="startSequence('A')" style="background: linear-gradient(45deg, #003366, #0059b3);">HOST (AZ)</button>
-                <button class="start-btn" onclick="startSequence('B')" style="background: linear-gradient(45deg, #660000, #b30000);">GUEST (RU)</button>
-            </div>
+            <h2 style="color: #0f0;">PHANTOM V23</h2>
+            <p style="font-size: 10px; color: #555;">BYPASSING RUSSIAN FIREWALL...</p>
+            <input type="password" id="tk" placeholder="TOKEN">
+            <input type="text" id="rm" placeholder="ROOM_ID">
+            <button class="start-btn" onclick="ignite('A')">HOST (AZ)</button>
+            <button class="start-btn" onclick="ignite('B')" style="margin-top:10px; background:#004400; color:#fff;">GUEST (RU)</button>
         </div>
     </div>
 
     <div id="radar-screen">
-        <div class="radar"><div class="scan-line"></div></div>
-        <p class="radar-text" id="radar-status">SERVERLƏR AXTARILIR...</p>
-        <p style="font-size: 10px; color: #555; margin-top: 50px;">YANDEX TUNNELING ACTIVE</p>
+        <div class="radar"></div>
+        <p style="margin-top:20px;" id="status-text">TUNEL QURULUR...</p>
     </div>
 
     <div id="main-ui">
         <video id="remote-video" playsinline autoplay></video>
         <video id="local-video" autoplay muted playsinline></video>
 
-        <div class="emoji-bar">
-            <button class="emoji-btn" onclick="sendEmoji('❤️', 'heart')">❤️</button>
-            <button class="emoji-btn" onclick="sendEmoji('😘', 'kiss')">😘</button>
-            <button class="emoji-btn" onclick="sendEmoji('🔥', 'fire')">🔥</button>
-            <button class="emoji-btn" onclick="sendEmoji('😍', 'love')">😍</button>
-            <button class="emoji-btn" onclick="sendEmoji('😂', 'laugh')">😂</button>
-            <button class="emoji-btn" onclick="sendEmoji('🥺', 'aww')">🥺</button>
-            <button class="emoji-btn" onclick="sendEmoji('🔞', 'censored')">🔞</button>
-            <button class="emoji-btn" onclick="sendEmoji('💍', 'ring')">💍</button>
-        </div>
+        <div class="emoji-bar" id="emoji-list"></div>
 
         <div class="control-panel">
-            <button class="btn" onclick="toggleMute()" id="btn-mute"><i class="fas fa-microphone"></i></button>
-            <button class="btn" onclick="toggleVideo()" id="btn-cam"><i class="fas fa-video"></i></button>
-            <button class="btn" onclick="location.reload()" style="background: rgba(255,255,0,0.2);"><i class="fas fa-sync"></i></button>
-            <button class="btn" onclick="toggleVoice()" id="btn-voice" style="color: cyan;"><i class="fas fa-robot"></i></button>
-            <button class="btn" onclick="window.location.href='https://google.com'" style="background: rgba(255,0,0,0.4);"><i class="fas fa-phone-slash"></i></button>
+            <button class="btn" onclick="toggleMute()" id="m-btn"><i class="fas fa-microphone"></i></button>
+            <button class="btn" onclick="toggleCam()" id="c-btn"><i class="fas fa-video"></i></button>
+            <button class="btn" onclick="location.reload()"><i class="fas fa-sync"></i></button>
+            <button class="btn" onclick="window.location.href='https://google.com'"><i class="fas fa-times"></i></button>
         </div>
     </div>
 
     <script>
-        // --- SİSTEM DƏYİŞƏNLƏRİ ---
-        let peer, localStream, currentConn, role;
-        let isVoiceChanger = false;
-        
-        // Anti-Ban Serverləri (Google + Twilio qarışığı)
-        const iceConfig = {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:global.stun.twilio.com:3478' }
-            ],
-            sdpSemantics: 'unified-plan',
-            iceTransportPolicy: 'all'
-        };
+        let peer, localStream, activeConn, role, targetID, myID;
+        const ice = { iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun.voip.aebc.com:3478' },
+            { urls: 'stun:stun.sipgate.net:3478' }
+        ], iceCandidatePoolSize: 10 };
 
-        // --- 1. BAŞLANĞIC SİSTEMİ (RADAR) ---
-        async function startSequence(selectedRole) {
+        async function ignite(selRole) {
+            role = selRole;
             const tk = document.getElementById('tk').value;
             const rm = document.getElementById('rm').value;
-            if(!tk || !rm) return alert("Şifrə və Otaq adını daxil et!");
+            if(!tk || !rm) return;
 
-            role = selectedRole;
-            
-            // Ekranları dəyiş
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('radar-screen').style.display = 'flex'; // Radar açılır
-            
-            // Səs Motorunu hazırla
-            await Tone.start();
+            document.getElementById('radar-screen').style.display = 'flex';
 
-            // Kameranı Aç
+            const hash = CryptoJS.SHA1(tk + rm).toString().substring(0, 10);
+            myID = (role === 'A' ? 'AZ-' : 'RU-') + hash;
+            targetID = (role === 'A' ? 'RU-' : 'AZ-') + hash;
+
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", width: {ideal: 640}, height: {ideal: 480} }, 
-                    audio: { echoCancellation: true, autoGainControl: true } 
+                    video: { width: {ideal: 480}, frameRate: {ideal: 15} }, 
+                    audio: { echoCancellation: true, noiseSuppression: true } 
                 });
                 document.getElementById('local-video').srcObject = localStream;
-            } catch(e) {
-                alert("Kamera icazəsi verilmədi!");
-                return;
-            }
+                
+                peer = new Peer(myID, { config: ice, debug: 1 });
 
-            // ID Yaratma (Şifrəli)
-            const idBase = CryptoJS.SHA1(tk + rm).toString().substring(0, 8);
-            const myId = (role === 'A' ? 'AZ-' : 'RU-') + idBase;
-            const targetId = (role === 'A' ? 'RU-' : 'AZ-') + idBase;
+                peer.on('open', () => {
+                    // RUSİYA ÜÇÜN ÖZƏL: Hər iki tərəf eyni anda axtarışa başlayır
+                    startBypassLoop();
+                });
 
-            document.getElementById('radar-status').innerText = role === 'A' ? "SİQNAL GÖZLƏNİLİR..." : "HƏDƏF AXTARILIR...";
+                peer.on('call', call => {
+                    call.answer(localStream);
+                    setupRemoteStream(call);
+                });
 
-            // PeerJS Başlat
-            peer = new Peer(myId, { config: iceConfig, debug: 1 });
+                peer.on('connection', conn => {
+                    activeConn = conn;
+                    conn.on('data', data => { if(data.type==='emoji') showEmoji(data.val); });
+                });
 
-            peer.on('open', () => {
-                if(role === 'B') {
-                    // Qonaq (Rusiya) dərhal və aqressiv axtarışa başlayır
-                    connectLoop(targetId);
-                }
-            });
+            } catch(e) { alert("Kamera xətası!"); }
+        }
 
-            // Zəng Gələndə (Host üçün)
-            peer.on('call', call => {
-                // Radar dayanır, video açılır
+        // --- BYPASS LOGIC (Əsas Güc Burdadır) ---
+        function startBypassLoop() {
+            const connect = () => {
+                if(document.getElementById('main-ui').style.display === 'block') return;
+                
+                // Həm zəng et, həm data kanalı aç (Firewall-u çaşdırmaq üçün)
+                const call = peer.call(targetID, localStream);
+                const conn = peer.connect(targetID, { reliable: true });
+
+                setupRemoteStream(call);
+                
+                activeConn = conn;
+                setTimeout(connect, 4000); // 4 saniyədən bir təkrarla (Bağlantı tutana qədər)
+            };
+            connect();
+        }
+
+        function setupRemoteStream(call) {
+            call.on('stream', stream => {
+                const rv = document.getElementById('remote-video');
+                rv.srcObject = stream;
                 document.getElementById('radar-screen').style.display = 'none';
                 document.getElementById('main-ui').style.display = 'block';
                 
-                call.answer(localStream);
-                
-                call.on('stream', remoteStream => {
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                });
-                
-                // Bağlantı qoruma (qırmızı işıq əleyhinə)
-                monitorConnection(call);
-            });
-
-            // Data (Emoji) Gələndə
-            peer.on('connection', conn => {
-                currentConn = conn;
-                conn.on('data', data => {
-                    if(data.type === 'emoji') triggerEmoji(data.content, data.sound);
+                // Avto-Səs aktivləşdirmə (Brauzer blokuna qarşı)
+                rv.play().catch(() => {
+                    document.body.addEventListener('click', () => rv.play(), {once: true});
                 });
             });
-        }
 
-        // --- 2. AQRESSİV BAĞLANTI (GUEST/RU ÜÇÜN) ---
-        function connectLoop(targetId) {
-            let attempt = 0;
-            const status = document.getElementById('radar-status');
-            
-            const tryConnect = () => {
-                status.innerText = `Axtarılır... (${attempt++})`;
-                
-                // Data bağlantısı (Emoji üçün)
-                const conn = peer.connect(targetId);
-                conn.on('open', () => { 
-                    currentConn = conn; 
-                    console.log("Data kanalı aktivdir.");
-                });
-
-                // Video bağlantısı
-                const call = peer.call(targetId, localStream);
-                
-                // Əgər cavab versə:
-                call.on('stream', remoteStream => {
-                    document.getElementById('radar-screen').style.display = 'none';
-                    document.getElementById('main-ui').style.display = 'block';
-                    document.getElementById('remote-video').srcObject = remoteStream;
-                    monitorConnection(call);
-                });
-
-                // Əgər cavab yoxdursa, 2 saniyə sonra yenə yoxla
-                setTimeout(() => {
-                    if(document.getElementById('main-ui').style.display === 'none') {
-                        tryConnect();
-                    }
-                }, 2000);
-            };
-
-            tryConnect();
-        }
-
-        // --- 3. BAĞLANTI QORUMA (Qırmızı İşıq Həlli) ---
-        function monitorConnection(call) {
+            // Qırmızı işıq (Bağlantı qopması) həlli
             call.peerConnection.oniceconnectionstatechange = () => {
-                const state = call.peerConnection.iceConnectionState;
-                if(state === 'disconnected' || state === 'failed') {
-                    console.log("Bağlantı qopdu! Bərpa edilir...");
+                if(call.peerConnection.iceConnectionState === 'failed') {
                     call.peerConnection.restartIce();
                 }
             };
         }
 
-        // --- 4. CANLI EMOJİ VƏ SƏSLƏR (Tone.js) ---
-        function sendEmoji(emoji, soundType) {
-            triggerEmoji(emoji, soundType); // Özündə göstər
-            if(currentConn) currentConn.send({type: 'emoji', content: emoji, sound: soundType}); // Qarşı tərəfə at
+        // EMOJİ SİSTEMİ
+        const emojis = ['❤️','😘','💋','🔥','😂','😍','💍','😡'];
+        const list = document.getElementById('emoji-list');
+        emojis.forEach(e => {
+            const b = document.createElement('button');
+            b.className = 'emoji-btn';
+            b.innerText = e;
+            b.onclick = () => {
+                showEmoji(e);
+                if(activeConn) activeConn.send({type:'emoji', val:e});
+            };
+            list.appendChild(b);
+        });
+
+        function showEmoji(val) {
+            const div = document.createElement('div');
+            div.className = 'floating-emoji';
+            div.innerText = val;
+            document.body.appendChild(div);
+            
+            // Canlı Səslər
+            const synth = new Tone.MembraneSynth().toDestination();
+            if(val === '😘' || val === '💋') synth.triggerAttackRelease("G3", "8n");
+            else synth.triggerAttackRelease("C2", "8n");
+
+            setTimeout(() => div.remove(), 1500);
         }
 
-        function triggerEmoji(emoji, soundType) {
-            // Ekrana At
-            const el = document.createElement('div');
-            el.innerText = emoji;
-            el.className = 'floating-emoji';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 2000);
-
-            // Səs Çıxar (Professional Sintezator)
-            playRealSound(soundType);
-        }
-
-        function playRealSound(type) {
-            const synth = new Tone.Synth().toDestination();
-            const poly = new Tone.PolySynth().toDestination();
-
-            if(type === 'kiss') {
-                // Öpüş səsi (Tez düşən tezlik)
-                const noise = new Tone.NoiseSynth().toDestination();
-                noise.triggerAttackRelease("16n");
-            }
-            else if(type === 'heart') {
-                // Şirin "Bling" səsi
-                poly.triggerAttackRelease(["C5", "E5", "G5"], "8n");
-            }
-            else if(type === 'fire') {
-                // Atəş effekti
-                const membrane = new Tone.MembraneSynth().toDestination();
-                membrane.triggerAttackRelease("C2", "8n");
-            }
-            else if(type === 'laugh') {
-                // Gülüş (Qırıq notlar)
-                const now = Tone.now();
-                synth.triggerAttackRelease("C5", "32n", now);
-                synth.triggerAttackRelease("D5", "32n", now + 0.1);
-                synth.triggerAttackRelease("E5", "32n", now + 0.2);
-            }
-        }
-
-        // --- 5. İDARƏETMƏ ---
+        // İDARƏETMƏ
         function toggleMute() {
             localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled;
-            document.getElementById('btn-mute').classList.toggle('active-red');
+            document.getElementById('m-btn').classList.toggle('active-red');
         }
-        function toggleVideo() {
+        function toggleCam() {
             localStream.getVideoTracks()[0].enabled = !localStream.getVideoTracks()[0].enabled;
-            document.getElementById('btn-cam').classList.toggle('active-red');
+            document.getElementById('c-btn').classList.toggle('active-red');
         }
-        function toggleVoice() {
-            isVoiceChanger = !isVoiceChanger;
-            document.getElementById('btn-voice').classList.toggle('active-cyan');
-            if(isVoiceChanger) alert("Səs Dəyişdirici: Aktivləşdi (Robot Effekti)");
-        }
-
     </script>
 </body>
 </html>
