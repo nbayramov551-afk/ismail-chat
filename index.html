@@ -3,105 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHANTOM_V35_ULTRA</title>
+    <title>PHANTOM_V20_ULTRA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; }
         #login-screen { position: fixed; inset: 0; background: radial-gradient(circle, #051005 0%, #000 100%); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        .terminal-box { border: 1px solid #0f0; padding: 30px; width: 320px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px #0f0; border-radius: 15px; text-align: center; }
-        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; border-radius: 5px; }
-        .start-btn { width: 100%; padding: 15px; background: #0f0; color: #000; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; border-radius: 5px; box-shadow: 0 0 10px #0f0; }
+        .terminal-box { border: 1px solid #0f0; padding: 30px; width: 320px; background: rgba(0,0,0,0.9); box-shadow: 0 0 20px #0f0; border-radius: 5px; text-align: center; }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; }
+        .start-btn { width: 100%; padding: 15px; background: #0f0; color: #000; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; }
         #main-ui { display: none; width: 100vw; height: 100vh; position: relative; }
-        video { width: 100%; height: 100%; object-fit: cover; background: #010101; }
-        #local-v { position: absolute; bottom: 110px; right: 20px; width: 120px; height: 160px; border: 1px solid #0f0; z-index: 10; border-radius: 10px; object-fit: cover; }
-        #status-bar { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.85); color: #0f0; font-size: 11px; padding: 8px; text-align: center; z-index: 100; border-bottom: 1px solid #0f0; letter-spacing: 1px; }
-        .lock-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .panic-btn { width: 160px; height: 160px; border-radius: 50%; background: #0f0; border: 8px solid #000; color: #000; font-weight: 900; cursor: pointer; box-shadow: 0 0 40px #0f0; animation: pulse 0.8s infinite; font-size: 18px; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 20px #0f0; } 50% { transform: scale(1.05); box-shadow: 0 0 50px #0f0; } 100% { transform: scale(1); box-shadow: 0 0 20px #0f0; } }
+        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.1) brightness(1.1); }
+        #local-v { position: absolute; bottom: 110px; right: 20px; width: 110px; height: 150px; border: 1px solid #0f0; z-index: 10; border-radius: 4px; }
+        #status-bar { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.8); color: #0f0; font-size: 10px; padding: 5px; text-align: center; z-index: 100; border-bottom: 1px solid #0f0; }
+        .lock-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .panic-btn { width: 150px; height: 150px; border-radius: 50%; background: #f00; border: 5px solid #fff; color: #fff; font-weight: 900; cursor: pointer; box-shadow: 0 0 30px #f00; animation: pulse 0.8s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="terminal-box">
-            <h2 style="letter-spacing: 5px; margin-bottom: 5px;">PHANTOM V35</h2>
-            <p style="font-size: 10px; color: #0f0; margin-bottom: 20px;">GENESIS BYPASS // ENCRYPTED RELAY</p>
+            <h2 style="letter-spacing: 5px;">PHANTOM V20</h2>
+            <p style="font-size: 9px; color: #0a0;">ENCRYPTED RELAY // BYPASS ACTIVE</p>
             <input type="password" id="tk" placeholder="TOKEN (GİZLİ)">
-            <input type="text" id="rm" placeholder="ROOM_ID (GİZLİ)">
-            <div style="display: flex; gap: 8px;">
-                <button class="start-btn" onclick="run('A')" style="font-size: 11px;">TUNEL AÇ (AZ)</button>
-                <button class="start-btn" onclick="run('B')" style="font-size: 11px; background: #003300; color: #0f0; border: 1px solid #0f0;">SİQNAL TUT (RU)</button>
+            <input type="text" id="rm" placeholder="ROOM_ID">
+            <div style="display: flex; gap: 5px;">
+                <button class="start-btn" onclick="run('A')" style="font-size: 10px;">HOST (AZ)</button>
+                <button class="start-btn" onclick="run('B')" style="font-size: 10px; background: #004400; color: #fff;">GUEST (RU)</button>
             </div>
         </div>
     </div>
 
     <div id="main-ui">
         <div id="status-bar">SİSTEM: TUNEL GÖZLƏNİLİR...</div>
-        <video id="rv" playsinline autoplay></video>
+        <video id="rv" playsinline></video>
         <video id="lv" autoplay muted playsinline></video>
         
         <div class="lock-screen" id="lock">
-            <button class="panic-btn" onclick="unlock()">SİQNALI<br>DEŞ!</button>
-            <p style="margin-top: 25px; color: #0f0; font-size: 13px; font-weight: bold;">GİZLİ XƏTT TAPILDI!</p>
+            <button class="panic-btn" onclick="unlock()">GÖRÜNTÜNÜ<br>MƏCBUR ET</button>
+            <p style="margin-top: 20px; color: #fff; font-size: 12px;">SIQNAL TUTULDU, AÇMAQ ÜÇÜN BASIN!</p>
         </div>
     </div>
 
     <script>
-        let peer, stream, role, callLoop;
+        let peer, stream, role;
         const log = t => document.getElementById('status-bar').innerText = "SİSTEM: " + t;
 
-        // 🛡️ İSRAİL VƏ AVROPA GÜCÜNDƏ STUN/TURN RELAY
+        // 🔱 RUSİYA ÜÇÜN "GHOST" SERVERLƏR (Məcburi TCP Relay)
         const ice = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun.ekiga.net' },
-                { urls: 'stun:stun.ideasip.com' },
-                { urls: 'stun:stun.rixtelecom.se' }
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun.voip.aebc.com:3478' }
             ],
-            iceTransportPolicy: 'all'
+            iceTransportPolicy: 'all',
+            sdpSemantics: 'unified-plan'
         };
 
         async function run(r) {
             role = r;
-            const tk = document.getElementById('tk').value.trim().toLowerCase();
-            const rm = document.getElementById('rm').value.trim().toLowerCase();
-            if(!tk || !rm) return alert("Giriş kodlarını daxil edin!");
+            const tk = document.getElementById('tk').value;
+            const rm = document.getElementById('rm').value;
+            if(!tk || !rm) return alert("Məlumatları daxil edin!");
 
-            // 🔱 ULTRA-HASH (SHA-256)
-            const hash = CryptoJS.SHA256(tk + "GENESIS" + rm).toString().substring(0, 12);
+            const hash = CryptoJS.SHA1(tk + rm).toString().substring(0, 10);
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-ui').style.display = 'block';
 
             try {
-                // 🔱 ADAPTIVE BANDWIDTH (Donmamaq üçün aşağıdan başlayıb qalxır)
+                // 🔱 PACKET FRAGMENTATION (Rusiyada kəsilməmək üçün ən kiçik paket ayarı)
                 stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: {ideal: 640}, height: {ideal: 480}, frameRate: {max: 24} }, 
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
+                    video: { width: {ideal: 160}, height: {ideal: 120}, frameRate: 10 }, 
+                    audio: { echoCancellation: true, noiseSuppression: true } 
                 });
                 document.getElementById('lv').srcObject = stream;
 
-                peer = new Peer((role=='A'?'AZ-':'RU-')+hash, {
-                    host: 'phantom-server-hwhx.onrender.com', // Sənin Render serverin
-                    port: 443,
-                    secure: true,
-                    config: ice,
-                    debug: 0
-                });
+                peer = new Peer((role=='A'?'AZ-':'RU-')+hash, { config: ice });
 
                 peer.on('open', id => {
-                    log(role=='A'?"TUNEL AÇIQ. SİQNAL GÖZLƏNİLİR...":"BAĞLANTI AXTARILIR...");
-                    
-                    // 🔱 AGGRESSIVE RE-DIAL (Hər 3 saniyədən bir tuneli deşməyə çalışır)
+                    log(role=='A'?"Rusiya gözlənilir...":"Azərbaycana qoşulur...");
                     if(role=='B') {
-                        callLoop = setInterval(() => {
-                            if (document.getElementById('lock').style.display !== 'none' || document.getElementById('rv').srcObject) return;
+                        // Rusiyadan zəngi bir neçə dəfə dalbadal göndəririk (Firewall-u yormaq üçün)
+                        let attempts = 0;
+                        const dial = () => {
+                            if(attempts > 5) return;
                             const call = peer.call('AZ-'+hash, stream);
-                            if(call) bind(call);
-                        }, 3000);
+                            bind(call);
+                            attempts++;
+                            setTimeout(dial, 5000);
+                        };
+                        dial();
                     }
                 });
 
@@ -110,21 +104,14 @@
                     bind(call);
                 });
 
-                peer.on('error', e => {
-                    if(e.type === 'peer-unavailable') log("QARŞI TƏRƏF DEYİL...");
-                    else log("XƏTA: TUNEL YENİLƏNİR...");
-                });
-
-            } catch(e) { log("İCAZƏ RƏDD EDİLDİ!"); }
+            } catch(e) { log("KAMERA XƏTASI!"); }
         }
 
         function bind(call) {
             call.on('stream', rs => {
-                const rv = document.getElementById('rv');
-                rv.srcObject = rs;
+                document.getElementById('rv').srcObject = rs;
                 document.getElementById('lock').style.display = 'flex';
-                log("SİQNAL ŞİFRƏSİ AÇILDI!");
-                if(callLoop) clearInterval(callLoop);
+                log("SIQNAL ALINDI! KİLİDİ AÇIN.");
             });
         }
 
@@ -132,14 +119,15 @@
             const rv = document.getElementById('rv');
             rv.play().then(() => {
                 document.getElementById('lock').style.display = 'none';
-                log("TUNEL ŞİFRƏLƏNDİ // AKTİV");
-            }).catch(() => {
+                log("TUNEL AKTİVDİR.");
+            }).catch(e => {
+                // Əgər autoplay bloklansa, təkrar yoxla
                 rv.muted = true;
                 rv.play();
-                document.getElementById('lock').style.display = 'none';
-                log("SƏSİ ƏLLƏ AKTİV EDİN!");
+                log("SƏSİ AYARLARDAN AÇIN!");
             });
         }
     </script>
 </body>
 </html>
+
