@@ -3,159 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHANTOM V33 - ULTRA GENESIS</title>
+    <title>PHANTOM_V35_ULTRA</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --glow: #00ff41; --danger: #ff003c; --bg: #000; --shadow: rgba(0, 255, 65, 0.4); }
-        body { background: var(--bg); color: var(--glow); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        
-        /* MATRIX GİRİŞ */
-        #login { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(#021a02 1px, transparent 1px); background-size: 20px 20px; }
-        .terminal { border: 2px solid var(--glow); padding: 40px; width: 320px; text-align: center; box-shadow: 0 0 30px var(--shadow); background: rgba(0,0,0,0.95); border-radius: 20px; }
-        
-        input { background: #000; border: 1px solid #004400; color: var(--glow); padding: 18px; width: 100%; margin: 12px 0; outline: none; box-sizing: border-box; font-size: 16px; border-radius: 10px; transition: 0.3s; }
-        input:focus { border-color: var(--glow); box-shadow: 0 0 15px var(--glow); }
-        
-        .btn-start { width: 100%; padding: 18px; background: var(--glow); color: #000; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; border-radius: 10px; letter-spacing: 2px; }
-
-        /* RADAR - STEALTH SCAN */
-        #radar { position: fixed; inset: 0; z-index: 500; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .scanner { width: 150px; height: 150px; border: 4px solid var(--danger); border-radius: 50%; position: relative; animation: sonar 1.2s infinite ease-out; }
-        @keyframes sonar { 0% { transform: scale(0.8); opacity: 1; box-shadow: 0 0 0 0 rgba(255,0,60,0.7); } 100% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 0 50px rgba(255,0,60,0); } }
-
-        /* GÖRÜNTÜ PANELİ */
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; height: 100vh; }
+        #login-screen { position: fixed; inset: 0; background: radial-gradient(circle, #051005 0%, #000 100%); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .terminal-box { border: 1px solid #0f0; padding: 30px; width: 320px; background: rgba(0,0,0,0.9); box-shadow: 0 0 30px #0f0; border-radius: 15px; text-align: center; }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; margin: 10px 0; width: 100%; box-sizing: border-box; outline: none; border-radius: 5px; }
+        .start-btn { width: 100%; padding: 15px; background: #0f0; color: #000; font-weight: bold; cursor: pointer; border: none; text-transform: uppercase; border-radius: 5px; box-shadow: 0 0 10px #0f0; }
         #main-ui { display: none; width: 100vw; height: 100vh; position: relative; }
-        #remote-video { width: 100%; height: 100%; object-fit: cover; background: #050505; }
-        #local-video { position: absolute; bottom: 120px; right: 25px; width: 130px; height: 180px; border: 2px solid var(--glow); border-radius: 15px; object-fit: cover; z-index: 10; box-shadow: 0 0 20px #000; }
-
-        /* CONTROL HUB */
-        .controls { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 25px; z-index: 20; background: rgba(0,0,0,0.9); padding: 20px 40px; border-radius: 100px; border: 1px solid var(--glow); box-shadow: 0 0 30px var(--shadow); }
-        .c-btn { width: 60px; height: 60px; border-radius: 50%; border: none; background: #111; color: #fff; font-size: 24px; cursor: pointer; transition: 0.2s; }
-        .c-btn:active { transform: scale(0.8); }
-        
-        .status-tag { position: absolute; top: 20px; left: 20px; background: rgba(0,255,65,0.1); padding: 5px 15px; border-radius: 20px; font-size: 12px; border: 1px solid var(--glow); }
+        video { width: 100%; height: 100%; object-fit: cover; background: #010101; }
+        #local-v { position: absolute; bottom: 110px; right: 20px; width: 120px; height: 160px; border: 1px solid #0f0; z-index: 10; border-radius: 10px; object-fit: cover; }
+        #status-bar { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.85); color: #0f0; font-size: 11px; padding: 8px; text-align: center; z-index: 100; border-bottom: 1px solid #0f0; letter-spacing: 1px; }
+        .lock-screen { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 500; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .panic-btn { width: 160px; height: 160px; border-radius: 50%; background: #0f0; border: 8px solid #000; color: #000; font-weight: 900; cursor: pointer; box-shadow: 0 0 40px #0f0; animation: pulse 0.8s infinite; font-size: 18px; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 20px #0f0; } 50% { transform: scale(1.05); box-shadow: 0 0 50px #0f0; } 100% { transform: scale(1); box-shadow: 0 0 20px #0f0; } }
     </style>
 </head>
 <body>
 
-    <div id="login">
-        <div class="terminal">
-            <h2 style="margin:0; letter-spacing:4px;">PHANTOM V33</h2>
-            <p style="font-size: 10px; color: #666; margin-bottom: 20px;">ENCRYPTED END-TO-END TUNNEL</p>
-            <input type="password" id="tk" placeholder="ŞİFRƏLİ TOKEN">
-            <input type="text" id="rm" placeholder="GİZLİ OTAQ">
-            <button class="btn-start" onclick="ignite('A')">DEŞİCİ (AZ)</button>
-            <button class="btn-start" onclick="ignite('B')" style="margin-top:12px; background:#003300; color:#fff; border: 1px solid var(--glow);">QƏBULÇU (RU)</button>
+    <div id="login-screen">
+        <div class="terminal-box">
+            <h2 style="letter-spacing: 5px; margin-bottom: 5px;">PHANTOM V35</h2>
+            <p style="font-size: 10px; color: #0f0; margin-bottom: 20px;">GENESIS BYPASS // ENCRYPTED RELAY</p>
+            <input type="password" id="tk" placeholder="TOKEN (GİZLİ)">
+            <input type="text" id="rm" placeholder="ROOM_ID (GİZLİ)">
+            <div style="display: flex; gap: 8px;">
+                <button class="start-btn" onclick="run('A')" style="font-size: 11px;">TUNEL AÇ (AZ)</button>
+                <button class="start-btn" onclick="run('B')" style="font-size: 11px; background: #003300; color: #0f0; border: 1px solid #0f0;">SİQNAL TUT (RU)</button>
+            </div>
         </div>
     </div>
 
-    <div id="radar">
-        <div class="scanner"></div>
-        <p id="status-text" style="color:var(--danger); margin-top:35px; font-weight:bold; letter-spacing:2px;">KOD DEŞİLİR...</p>
-    </div>
-
     <div id="main-ui">
-        <div class="status-tag"><i class="fas fa-shield-halved"></i> SECURE LINE</div>
-        <video id="remote-video" playsinline autoplay></video>
-        <video id="local-video" autoplay muted playsinline></video>
-        <div class="controls">
-            <button class="c-btn" onclick="toggleMute(this)"><i class="fas fa-microphone"></i></button>
-            <button class="c-btn" onclick="toggleCam(this)"><i class="fas fa-video"></i></button>
-            <button class="c-btn" onclick="location.reload()" style="background:#222;"><i class="fas fa-bolt-lightning"></i></button>
-            <button class="c-btn" onclick="window.location.href='https://google.com'" style="background:var(--danger);"><i class="fas fa-power-off"></i></button>
+        <div id="status-bar">SİSTEM: TUNEL GÖZLƏNİLİR...</div>
+        <video id="rv" playsinline autoplay></video>
+        <video id="lv" autoplay muted playsinline></video>
+        
+        <div class="lock-screen" id="lock">
+            <button class="panic-btn" onclick="unlock()">SİQNALI<br>DEŞ!</button>
+            <p style="margin-top: 25px; color: #0f0; font-size: 13px; font-weight: bold;">GİZLİ XƏTT TAPILDI!</p>
         </div>
     </div>
 
     <script>
-        let peer, localStream, role, targetID, myID, callLoop;
-        const PHANTOM_SERVER = 'phantom-server-hwhx.onrender.com';
+        let peer, stream, role, callLoop;
+        const log = t => document.getElementById('status-bar').innerText = "SİSTEM: " + t;
 
-        // SERVER WAKE-UP SCRIPT (Serveri dərhal oyadır)
-        fetch(`https://${PHANTOM_SERVER}`).catch(() => console.log("Wakeup signal sent."));
+        // 🛡️ İSRAİL VƏ AVROPA GÜCÜNDƏ STUN/TURN RELAY
+        const ice = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun.ekiga.net' },
+                { urls: 'stun:stun.ideasip.com' },
+                { urls: 'stun:stun.rixtelecom.se' }
+            ],
+            iceTransportPolicy: 'all'
+        };
 
-        async function ignite(sel) {
-            role = sel;
-            const tk = document.getElementById('tk').value.trim();
-            const rm = document.getElementById('rm').value.trim();
-            if(!tk || !rm) return;
+        async function run(r) {
+            role = r;
+            const tk = document.getElementById('tk').value.trim().toLowerCase();
+            const rm = document.getElementById('rm').value.trim().toLowerCase();
+            if(!tk || !rm) return alert("Giriş kodlarını daxil edin!");
 
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('radar').style.display = 'flex';
-
-            // ISRAELI ENCRYPTION ALGORITHM (SHA256 based)
-            const cryptoKey = CryptoJS.SHA256(tk + "phantom_salt_2026" + rm).toString().substring(0, 16);
-            myID = (role === 'A' ? 'SRC-' : 'DST-') + cryptoKey;
-            targetID = (role === 'A' ? 'DST-' : 'SRC-') + cryptoKey;
+            // 🔱 ULTRA-HASH (SHA-256)
+            const hash = CryptoJS.SHA256(tk + "GENESIS" + rm).toString().substring(0, 12);
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-ui').style.display = 'block';
 
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: {ideal: 1280}, height: {ideal: 720}, frameRate: 30 }, 
-                    audio: { echoCancellation: true, noiseSuppression: true }
+                // 🔱 ADAPTIVE BANDWIDTH (Donmamaq üçün aşağıdan başlayıb qalxır)
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: {ideal: 640}, height: {ideal: 480}, frameRate: {max: 24} }, 
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } 
                 });
-                document.getElementById('local-video').srcObject = localStream;
+                document.getElementById('lv').srcObject = stream;
 
-                // AQRESSİV TUNEL SİSTEMİ
-                peer = new Peer(myID, {
-                    host: PHANTOM_SERVER,
+                peer = new Peer((role=='A'?'AZ-':'RU-')+hash, {
+                    host: 'phantom-server-hwhx.onrender.com', // Sənin Render serverin
                     port: 443,
-                    path: '/',
                     secure: true,
-                    debug: 0,
-                    config: { 
-                        'iceServers': [
-                            { 'urls': 'stun:stun.l.google.com:19302' },
-                            { 'urls': 'stun:stun1.l.google.com:19302' },
-                            { 'urls': 'stun:stun.services.mozilla.com' }
-                        ],
-                        'sdpSemantics': 'unified-plan'
+                    config: ice,
+                    debug: 0
+                });
+
+                peer.on('open', id => {
+                    log(role=='A'?"TUNEL AÇIQ. SİQNAL GÖZLƏNİLİR...":"BAĞLANTI AXTARILIR...");
+                    
+                    // 🔱 AGGRESSIVE RE-DIAL (Hər 3 saniyədən bir tuneli deşməyə çalışır)
+                    if(role=='B') {
+                        callLoop = setInterval(() => {
+                            if (document.getElementById('lock').style.display !== 'none' || document.getElementById('rv').srcObject) return;
+                            const call = peer.call('AZ-'+hash, stream);
+                            if(call) bind(call);
+                        }, 3000);
                     }
                 });
 
-                peer.on('open', (id) => {
-                    document.getElementById('status-text').innerText = "TUNEL AKTİVDİR. SİNYAL GÖNDƏRİLİR...";
-                    
-                    // SUPER ATTACK LOOP (Hər 1.5 saniyədən bir zəngi təkrarlayır)
-                    callLoop = setInterval(() => {
-                        if (document.getElementById('main-ui').style.display === 'none') {
-                            const call = peer.call(targetID, localStream);
-                            if(call) handleCall(call);
-                        }
-                    }, 1500);
-                });
-
                 peer.on('call', call => {
-                    call.answer(localStream);
-                    handleCall(call);
+                    call.answer(stream);
+                    bind(call);
                 });
 
-            } catch(e) { alert("SİSTEM XƏTASI: Kameraya icazə verilmədi!"); location.reload(); }
+                peer.on('error', e => {
+                    if(e.type === 'peer-unavailable') log("QARŞI TƏRƏF DEYİL...");
+                    else log("XƏTA: TUNEL YENİLƏNİR...");
+                });
+
+            } catch(e) { log("İCAZƏ RƏDD EDİLDİ!"); }
         }
 
-        function handleCall(call) {
-            call.on('stream', stream => {
-                const rv = document.getElementById('remote-video');
-                rv.srcObject = stream;
-                document.getElementById('radar').style.display = 'none';
-                document.getElementById('main-ui').style.display = 'block';
-                clearInterval(callLoop);
-                rv.play().catch(() => {});
+        function bind(call) {
+            call.on('stream', rs => {
+                const rv = document.getElementById('rv');
+                rv.srcObject = rs;
+                document.getElementById('lock').style.display = 'flex';
+                log("SİQNAL ŞİFRƏSİ AÇILDI!");
+                if(callLoop) clearInterval(callLoop);
             });
-            // Əgər bağlantı kəsilsə avtomatik radar rejimini qaytar
-            call.on('close', () => location.reload());
         }
 
-        function toggleMute(btn) {
-            const s = localStream.getAudioTracks()[0].enabled = !localStream.getAudioTracks()[0].enabled;
-            btn.innerHTML = s ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
-            btn.style.color = s ? "#fff" : "var(--danger)";
-        }
-        function toggleCam(btn) {
-            const s = localStream.getVideoTracks()[0].enabled = !localStream.getVideoTracks()[0].enabled;
-            btn.innerHTML = s ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
-            btn.style.color = s ? "#fff" : "var(--danger)";
+        function unlock() {
+            const rv = document.getElementById('rv');
+            rv.play().then(() => {
+                document.getElementById('lock').style.display = 'none';
+                log("TUNEL ŞİFRƏLƏNDİ // AKTİV");
+            }).catch(() => {
+                rv.muted = true;
+                rv.play();
+                document.getElementById('lock').style.display = 'none';
+                log("SƏSİ ƏLLƏ AKTİV EDİN!");
+            });
         }
     </script>
 </body>
